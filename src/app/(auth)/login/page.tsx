@@ -1,13 +1,10 @@
 import FormLogin from "@/components/FormLogin";
 import React from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
 
-function Login() {
-  return (
-    <main>
-      <FormLogin />
-    </main>
-  );
+function Login({ searchParams }: { searchParams: { verified: string } }) {
+  const isVerified = searchParams.verified === "true";
+
+  return <FormLogin isVerified={isVerified} />;
 }
 
 export default Login;

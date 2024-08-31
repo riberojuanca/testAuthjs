@@ -1,46 +1,61 @@
 "use client";
 
+import { registerAction } from "@/actions/auth-actions";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
-type Inputs = {
+export type Inputs = {
   id: number;
-  username: string;
+  name: string;
   email: string;
   password: string;
   confirmPassword: string;
 };
 
 const FormRegister = () => {
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
-  };
+  async function onSubmit(data: Inputs) {
+    setError(null);
+    startTransition(async () => {
+      const response = await registerAction(data);
+      console.log(response);
+      if (response.error) {
+        setError(response.error);
+      } else {
+        router.push("/login");
+      }
+    });
+  }
 
   return (
     <section>
-      {" "}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col justify-center gap-2 min-w-72 w-1/6"
       >
         <h1 className="text-xl font-bold uppercase">Register</h1>
-        <label htmlFor="username" className="text-gray-500">
-          Username
+        <label htmlFor="name" className="text-gray-500">
+          Name
         </label>
         <input
           type="text"
-          {...register("username", {
-            required: { value: true, message: "Username is required" },
+          {...register("name", {
+            required: { value: true, message: "Name is required" },
           })}
         />
-        {errors.username && (
+        {errors.name && (
           <span className="w-full flex justify-end text-xs text-red-600">
-            {errors.username.message}
+            {errors.name.message}
           </span>
         )}
 
@@ -97,6 +112,7 @@ const FormRegister = () => {
         <button className="bg-blue-200 p-2 rounded-sm uppercase font-semibold mt-2">
           Register
         </button>
+        {error && <span>{error}</span>}
       </form>
     </section>
   );

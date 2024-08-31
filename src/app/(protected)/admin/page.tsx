@@ -1,19 +1,19 @@
 import { auth } from "@/auth";
 import LogoutButton from "@/components/LogoutButton";
 
-async function Dashboard() {
+const AdminPage = async () => {
   const session = await auth();
 
-  if (!session) {
-    return <div>Not authenticated</div>;
+  if (session?.user.role !== "admin") {
+    return <div>You are not admin</div>;
   }
 
   return (
-    <div className="container">
+    <div>
       <pre>{JSON.stringify(session, null, 2)}</pre>
       <LogoutButton />
     </div>
   );
-}
+};
 
-export default Dashboard;
+export default AdminPage;

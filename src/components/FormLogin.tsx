@@ -1,25 +1,32 @@
 "use client";
+import { loginAction, LoginResponse } from "@/actions/auth-actions";
+import { useForm } from "react-hook-form";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Inputs } from "./FormRegister";
 
-import { SubmitHandler, useForm } from "react-hook-form";
+const FormLogin = ({ isVerified }: { isVerified: boolean }) => {
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
-type Inputs = {
-  id: number;
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-};
-
-const FormLogin = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log(data);
-  };
+  async function onSubmit(data: Inputs) {
+    setError(null);
+    startTransition(async () => {
+      const response: LoginResponse = await loginAction(data);
+      if (response.error) {
+        setError(response.error);
+      } else {
+        router.push("/dashboard");
+      }
+    });
+  }
 
   return (
     <section>
@@ -63,14 +70,22 @@ const FormLogin = () => {
           </span>
         )}
 
-        <button className="bg-blue-200 p-2 rounded-sm uppercase font-semibold mt-2">
+        <button
+          disabled={isPending}
+          className="bg-blue-200 p-2 rounded-sm uppercase font-semibold mt-2"
+        >
           Login
         </button>
-        {/* {error && (
-        <span className="relative bg-red-800 text-sm rounded-sm text-white p-2">
-          {error}
-        </span>
-      )} */}
+        {error && (
+          <span className="relative bg-red-800 text-sm rounded-sm text-white p-2">
+            {error}
+          </span>
+        )}
+        {isVerified && (
+          <span className="relative bg-green-800 text-sm rounded-sm text-white p-2">
+            Your email now is verified!
+          </span>
+        )}
       </form>
     </section>
   );
